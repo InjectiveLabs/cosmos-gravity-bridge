@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/althea-net/peggy/module/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -43,6 +44,12 @@ func (k Keeper) DenomToERC20Lookup(ctx sdk.Context, denom string) (bool, string,
 	tc1, err := types.PeggyDenomToERC20(denom)
 
 	if err != nil {
+
+		// If denom is native cosmos coin denom, return Cosmos coin ERC20 contract address from Params.
+		if strings.EqualFold(denom, k.GetCosmosCoinDenom(ctx)) {
+			return false, k.GetCosmosCoinERC20Contract(ctx), nil
+		}
+
 		// Look up ERC20 contract in index and error if it's not in there.
 		tc2, exists := k.GetCosmosOriginatedERC20(ctx, denom)
 		if !exists {
@@ -65,6 +72,8 @@ func (k Keeper) ERC20ToDenomLookup(ctx sdk.Context, tokenContract string) (bool,
 	if exists {
 		// It is a cosmos originated asset
 		return true, dn1
+	} else if strings.EqualFold(tokenContract, k.GetCosmosCoinERC20Contract(ctx)) {
+		return false, k.GetCosmosCoinDenom(ctx)
 	} else {
 		// If it is not in there, it is not a cosmos originated token, turn the ERC20 into a peggy denom
 		return false, types.PeggyDenom(tokenContract)

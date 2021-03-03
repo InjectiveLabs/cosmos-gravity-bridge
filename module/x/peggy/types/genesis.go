@@ -37,6 +37,12 @@ var (
 	// ParamsStoreKeyBridgeContractChainID stores the bridge chain id
 	ParamsStoreKeyBridgeContractChainID = []byte("BridgeChainID")
 
+	// ParamsStoreKeyCosmosCoinDenom stores native cosmos coin denom
+	ParamsStoreKeyCosmosCoinDenom = []byte("CosmosCoinDenom")
+
+	// ParamsStoreKeyCosmosCoinErc20Contract store L1 erc20 contract address of cosmos native coin
+	ParamsStoreKeyCosmosCoinErc20Contract = []byte("CosmosCoinErc20Contract")
+
 	// ParamsStoreKeySignedValsetsWindow stores the signed blocks window
 	ParamsStoreKeySignedValsetsWindow = []byte("SignedValsetsWindow")
 
@@ -91,7 +97,7 @@ func DefaultGenesisState() *GenesisState {
 // DefaultParams returns a copy of the default params
 func DefaultParams() *Params {
 	return &Params{
-		PeggyId:                       "defaultpeggyid",
+		PeggyId:                       "injective-peggyid",
 		SignedValsetsWindow:           10000,
 		SignedBatchesWindow:           10000,
 		SignedClaimsWindow:            10000,
@@ -102,6 +108,7 @@ func DefaultParams() *Params {
 		SlashFractionBatch:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionClaim:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
+		CosmosCoinDenom:               "inj",
 	}
 }
 
@@ -118,6 +125,12 @@ func (p Params) ValidateBasic() error {
 	}
 	if err := validateBridgeChainID(p.BridgeChainId); err != nil {
 		return sdkerrors.Wrap(err, "bridge chain id")
+	}
+	if err := validateCosmosCoinDenom(p.CosmosCoinDenom); err != nil {
+		return sdkerrors.Wrap(err, "cosmos coin denom")
+	}
+	if err := validateCosmosCoinErc20Contract(p.CosmosCoinErc20Contract); err != nil {
+		return sdkerrors.Wrap(err, "cosmos coin erc20 contract address")
 	}
 	if err := validateTargetBatchTimeout(p.TargetBatchTimeout); err != nil {
 		return sdkerrors.Wrap(err, "Batch timeout")
@@ -165,6 +178,8 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreKeyContractHash, &p.ContractSourceHash, validateContractHash),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractAddress, &p.BridgeEthereumAddress, validateBridgeContractAddress),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractChainID, &p.BridgeChainId, validateBridgeChainID),
+		paramtypes.NewParamSetPair(ParamsStoreKeyCosmosCoinDenom, &p.CosmosCoinDenom, validateCosmosCoinDenom),
+		paramtypes.NewParamSetPair(ParamsStoreKeyCosmosCoinErc20Contract, &p.CosmosCoinErc20Contract, validateCosmosCoinErc20Contract),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedValsetsWindow, &p.SignedValsetsWindow, validateSignedValsetsWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedBatchesWindow, &p.SignedBatchesWindow, validateSignedBatchesWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedClaimsWindow, &p.SignedClaimsWindow, validateSignedClaimsWindow),
@@ -327,4 +342,30 @@ func strToFixByteArray(s string) ([32]byte, error) {
 	}
 	copy(out[:], s)
 	return out, nil
+}
+
+func validateCosmosCoinDenom(i interface{}) error {
+	v, ok := i.(string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if _, err := strToFixByteArray(v); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateCosmosCoinErc20Contract(i interface{}) error {
+	v, ok := i.(string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	// empty address is valid
+	if v == "" {
+		return nil
+	}
+
+	return ValidateEthAddress(v)
 }
