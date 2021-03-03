@@ -562,10 +562,17 @@ func (k Keeper) setPeggyID(ctx sdk.Context, v string) {
 	k.paramSpace.Set(ctx, types.ParamsStoreKeyPeggyID, v)
 }
 
-// GetInjContractAddress returns the inj erc20 contract address on ETH
-func (k Keeper) GetInjContractAddress(ctx sdk.Context) string {
+// GetCosmosCoinDenom returns native cosmos coin denom
+func (k Keeper) GetCosmosCoinDenom(ctx sdk.Context) string {
 	var a string
-	k.paramSpace.Get(ctx, types.ParamsStoreKeyInjContractAddress, &a)
+	k.paramSpace.Get(ctx, types.ParamsStoreKeyCosmosCoinDenom, &a)
+	return a
+}
+
+// GetCosmosCoinERC20Contract returns the Cosmos coin ERC20 contract address
+func (k Keeper) GetCosmosCoinERC20Contract(ctx sdk.Context) string {
+	var a string
+	k.paramSpace.Get(ctx, types.ParamsStoreKeyCosmosCoinErc20Contract, &a)
 	return a
 }
 

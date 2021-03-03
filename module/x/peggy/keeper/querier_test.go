@@ -872,13 +872,14 @@ func TestQueryDenomToERC20(t *testing.T) {
 	assert.Equal(t, erc20, string(queriedERC20))
 }
 
-func TestQueryInjDenomToERC20(t *testing.T) {
+func TestQueryQueryCosmosCoinERC20(t *testing.T) {
 	input := CreateTestEnv(t)
 	ctx := input.Context
-	injContractAddr := input.PeggyKeeper.GetInjContractAddress(ctx)
+	cosmosCoinErc20Contract := input.PeggyKeeper.GetCosmosCoinERC20Contract(ctx)
+	cosmosCoinDenom := input.PeggyKeeper.GetCosmosCoinDenom(ctx)
 
-	queriedERC20, err := queryDenomToERC20(ctx, "inj", input.PeggyKeeper)
+	queriedERC20, err := queryDenomToERC20(ctx, cosmosCoinDenom, input.PeggyKeeper)
 	require.NoError(t, err)
 
-	assert.Equal(t, injContractAddr, string(queriedERC20))
+	assert.Equal(t, string(queriedERC20), cosmosCoinErc20Contract)
 }
