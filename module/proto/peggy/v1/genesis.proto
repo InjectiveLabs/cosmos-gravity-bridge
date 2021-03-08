@@ -99,10 +99,10 @@ message Params {
     (gogoproto.nullable)   = false
   ];
   uint64  unbond_slashing_valsets_window           = 17;
-  uint64  unbond_slashing_batch_window           = 18;  
-  string cosmos_coin_denom = 19;
-  string cosmos_coin_erc20_contract = 20;
+  string cosmos_coin_denom = 18;
+  string cosmos_coin_erc20_contract = 19;
   
+
 }
 
 
