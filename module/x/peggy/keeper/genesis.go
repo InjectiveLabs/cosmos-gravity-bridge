@@ -86,7 +86,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data types.GenesisState) {
 		if err != nil {
 			panic("Invalid delegate key in Genesis!")
 		}
-		val, _ := sdk.ValAddressFromBech32(keys.Validator)
+		val, _ := sdk.ValAddressFromBech32(keys.Sender)
 		orch, _ := sdk.AccAddressFromBech32(keys.Orchestrator)
 		// set the orchestrator address
 		k.SetOrchestratorValidator(ctx, val, orch)

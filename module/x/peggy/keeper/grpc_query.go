@@ -225,7 +225,7 @@ func (k Keeper) GetDelegateKeyByValidator(c context.Context, req *types.QueryDel
 		return nil, err
 	}
 	for _, key := range keys {
-		if req.ValidatorAddress == key.Validator {
+		if req.ValidatorAddress == key.Sender {
 			return &types.QueryDelegateKeysByValidatorAddressResponse{EthAddress: key.EthAddress, OrchestratorAddress: key.Orchestrator}, nil
 		}
 
@@ -242,7 +242,7 @@ func (k Keeper) GetDelegateKeyByOrchestrator(c context.Context, req *types.Query
 	}
 	for _, key := range keys {
 		if req.OrchestratorAddress == key.Orchestrator {
-			return &types.QueryDelegateKeysByOrchestratorAddressResponse{ValidatorAddress: key.Validator, EthAddress: key.EthAddress}, nil
+			return &types.QueryDelegateKeysByOrchestratorAddressResponse{ValidatorAddress: key.Sender, EthAddress: key.EthAddress}, nil
 		}
 
 	}
@@ -257,7 +257,7 @@ func (k Keeper) GetDelegateKeyByEth(c context.Context, req *types.QueryDelegateK
 	}
 	for _, key := range keys {
 		if req.EthAddress == key.EthAddress {
-			return &types.QueryDelegateKeysByEthAddressResponse{ValidatorAddress: key.Validator, OrchestratorAddress: key.Orchestrator}, nil
+			return &types.QueryDelegateKeysByEthAddressResponse{ValidatorAddress: key.Sender, OrchestratorAddress: key.Orchestrator}, nil
 		}
 
 	}

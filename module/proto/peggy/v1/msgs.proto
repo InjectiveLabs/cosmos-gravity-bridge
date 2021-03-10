@@ -35,12 +35,12 @@ service Msg {
       returns (MsgLogicCallExecutedClaimResponse) {
     option (google.api.http).post = "/peggy/v1/logic_call_executed_claim";
   }
-  rpc SetOrchestratorAddress(MsgSetOrchestratorAddress) returns(MsgSetOrchestratorAddressResponse) {
+  rpc SetOrchestratorAddresses(MsgSetOrchestratorAddresses) returns(MsgSetOrchestratorAddressesResponse) {
     option (google.api.http).post = "/peggy/v1/set_orchestrator_address";
   }
 }
 
-// MsgSetOrchestratorAddress
+// MsgSetOrchestratorAddresses
 // this message allows validators to delegate their voting responsibilities 
 // to a given key. This key is then used as an optional authentication method
 // for sigining oracle claims
@@ -53,13 +53,13 @@ service Msg {
 // ETH_ADDRESS
 // This is a hex encoded 0x Ethereum public key that will be used by this validator
 // on Ethereum
-message MsgSetOrchestratorAddress {
-  string validator = 1;
+message MsgSetOrchestratorAddresses {
+  string sender = 1;
   string orchestrator  = 2;
   string eth_address   = 3;
 }
 
-message MsgSetOrchestratorAddressResponse {}
+message MsgSetOrchestratorAddressesResponse {}
 
 // MsgValsetConfirm
 // this is the message sent by the validators when they wish to submit their

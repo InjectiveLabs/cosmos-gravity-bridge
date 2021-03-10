@@ -24,16 +24,17 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 
 var _ types.MsgServer = msgServer{}
 
-func (k msgServer) SetOrchestratorAddress(c context.Context, msg *types.MsgSetOrchestratorAddress) (*types.MsgSetOrchestratorAddressResponse, error) {
-	// ensure that this passes validation
-	err := msg.ValidateBasic()
-	if err != nil {
-		return nil, err
-	}
-
+func (k msgServer) SetOrchestratorAddresses(c context.Context, msg *types.MsgSetOrchestratorAddresses) (*types.MsgSetOrchestratorAddressesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	val, _ := sdk.ValAddressFromBech32(msg.Validator)
-	orch, _ := sdk.AccAddressFromBech32(msg.Orchestrator)
+	val, _ := sdk.ValAddressFromBech32(msg.Sender)
+
+	// get orchestrator address if available. otherwise default to validator address.
+	var orchestratorAddr sdk.AccAddress
+	if msg.Orchestrator != "" {
+		orchestratorAddr, _ = sdk.AccAddressFromBech32(msg.Orchestrator)
+	} else {
+		orchestratorAddr = sdk.AccAddress(val.Bytes())
+	}
 
 	// ensure that the validator exists
 	if k.Keeper.StakingKeeper.Validator(ctx, val) == nil {
@@ -45,7 +46,7 @@ func (k msgServer) SetOrchestratorAddress(c context.Context, msg *types.MsgSetOr
 	// are required for this message it could be sent in a hostile way.
 
 	// set the orchestrator address
-	k.SetOrchestratorValidator(ctx, val, orch)
+	k.SetOrchestratorValidator(ctx, val, orchestratorAddr)
 	// set the ethereum address
 	k.SetEthAddress(ctx, val, msg.EthAddress)
 
@@ -53,11 +54,11 @@ func (k msgServer) SetOrchestratorAddress(c context.Context, msg *types.MsgSetOr
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, msg.Type()),
-			sdk.NewAttribute(types.AttributeKeySetOperatorAddr, orch.String()),
+			sdk.NewAttribute(types.AttributeKeySetOperatorAddr, orchestratorAddr.String()),
 		),
 	)
 
-	return &types.MsgSetOrchestratorAddressResponse{}, nil
+	return &types.MsgSetOrchestratorAddressesResponse{}, nil
 
 }
 
