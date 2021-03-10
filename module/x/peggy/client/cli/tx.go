@@ -135,7 +135,7 @@ func CmdSendToEth() *cobra.Command {
 
 func CmdRequestBatch() *cobra.Command {
 	return &cobra.Command{
-		Use:   "build-batch [token_contract_address]",
+		Use:   "build-batch [token-contract-address]",
 		Short: "Build a new batch on the cosmos side for pooled withdrawal transactions",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -161,7 +161,7 @@ func CmdRequestBatch() *cobra.Command {
 
 func CmdSetOrchestratorAddress() *cobra.Command {
 	return &cobra.Command{
-		Use:   "set-orchestrator-address [validator-address] [orchestrator-address] [ethereum-address]",
+		Use:   "set-orchestrator-address [validator-acc-address] [orchestrator-acc-address] [ethereum-address]",
 		Short: "Allows validators to delegate their voting responsibilities to a given key.",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {

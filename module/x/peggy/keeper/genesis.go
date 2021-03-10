@@ -86,12 +86,15 @@ func InitGenesis(ctx sdk.Context, k Keeper, data types.GenesisState) {
 		if err != nil {
 			panic("Invalid delegate key in Genesis!")
 		}
-		val, _ := sdk.ValAddressFromBech32(keys.Sender)
-		orch, _ := sdk.AccAddressFromBech32(keys.Orchestrator)
-		// set the orchestrator address
-		k.SetOrchestratorValidator(ctx, val, orch)
-		// set the ethereum address
-		k.SetEthAddress(ctx, val, keys.EthAddress)
+		validatorAccountAddress, _ := sdk.AccAddressFromBech32(keys.Sender)
+		valAddress := sdk.ValAddress(validatorAccountAddress.Bytes())
+		orchestrator, _ := sdk.AccAddressFromBech32(keys.Orchestrator)
+
+		// set the orchestrator Cosmos address
+		k.SetOrchestratorValidator(ctx, valAddress, orchestrator)
+
+		// set the orchestrator Ethereum address
+		k.SetEthAddress(ctx, valAddress, keys.EthAddress)
 	}
 
 	// populate state with cosmos originated denom-erc20 mapping
