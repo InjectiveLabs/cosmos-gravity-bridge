@@ -609,7 +609,7 @@ func (k Keeper) UnpackAttestationClaim(att *types.Attestation) (types.EthereumCl
 	}
 }
 
-// GetDelegateKeys iterates both the EthAddress and Orchestrator address indexes to produce
+// GetOrchestratorAddresses iterates both the EthAddress and Orchestrator address indexes to produce
 // a vector of MsgSetOrchestratorAddresses entires containing all the delgate keys for state
 // export / import. This may seem at first glance to be excessively complicated, why not combine
 // the EthAddress and Orchestrator address indexes and simply iterate one thing? The answer is that
@@ -619,7 +619,7 @@ func (k Keeper) UnpackAttestationClaim(att *types.Attestation) (types.EthereumCl
 // address mapping will mean having to keep two of the same data around just to provide lookups.
 //
 // For the time being this will serve
-func (k Keeper) GetDelegateKeys(ctx sdk.Context) []*types.MsgSetOrchestratorAddresses {
+func (k Keeper) GetOrchestratorAddresses(ctx sdk.Context) []*types.MsgSetOrchestratorAddresses {
 	store := ctx.KVStore(k.storeKey)
 	prefix := []byte(types.EthAddressKey)
 	iter := store.Iterator(prefixRange(prefix))
@@ -635,8 +635,8 @@ func (k Keeper) GetDelegateKeys(ctx sdk.Context) []*types.MsgSetOrchestratorAddr
 		key := iter.Key()[len(types.EthAddressKey):]
 		value := iter.Value()
 		ethAddress := string(value)
-		valAddress := sdk.ValAddress(key)
-		ethAddresses[valAddress.String()] = ethAddress
+		validatorAccount := sdk.AccAddress(key)
+		ethAddresses[validatorAccount.String()] = ethAddress
 	}
 
 	store = ctx.KVStore(k.storeKey)
@@ -644,28 +644,27 @@ func (k Keeper) GetDelegateKeys(ctx sdk.Context) []*types.MsgSetOrchestratorAddr
 	iter = store.Iterator(prefixRange(prefix))
 	defer iter.Close()
 
-	orchAddresses := make(map[string]string)
+	orchestratorAddresses := make(map[string]string)
 
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()[len(types.KeyOrchestratorAddress):]
 		value := iter.Value()
 		orchAddress := sdk.AccAddress(key).String()
-		valAddress := sdk.ValAddress(value)
-		orchAddresses[valAddress.String()] = orchAddress
+		validatorAccount := sdk.AccAddress(value)
+		orchestratorAddresses[validatorAccount.String()] = orchAddress
 	}
 
 	var result []*types.MsgSetOrchestratorAddresses
 
-	for valAddr, ethAddr := range ethAddresses {
-		orch, ok := orchAddresses[valAddr]
+	for validatorAccount, ethAddr := range ethAddresses {
+		orch, ok := orchestratorAddresses[validatorAccount]
 		if !ok {
-			// this should never happen unless the store
-			// is somehow inconsistent
-			panic("Can't find address")
+			panic("cannot find validator account in orchestrator addresses mapping")
 		}
+
 		result = append(result, &types.MsgSetOrchestratorAddresses{
+			Sender:       validatorAccount,
 			Orchestrator: orch,
-			Sender:       valAddr,
 			EthAddress:   ethAddr,
 		})
 
